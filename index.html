@@ -112,8 +112,13 @@
                 <button class="chip-btn" data-query="Can I deploy this app?">Can I deploy this app?</button>
               </div>
               <div class="chat-input-area">
+                <button class="icon-btn" id="chat-mic-btn" title="Speak Question" aria-label="Voice input" style="border-radius: var(--radius-sm); border-bottom: 2px solid var(--text-muted); background: var(--bg-surface); color: var(--text-secondary); width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); flex-shrink: 0;">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </button>
                 <div class="input-wrapper">
-                  <input type="text" id="chat-text-input" class="chat-input" placeholder="Type your question here..." aria-label="Type your question">
+                  <input type="text" id="chat-text-input" class="chat-input" placeholder="Type or speak your question..." aria-label="Type your question">
                 </div>
                 <button class="btn-primary" id="chat-send-btn">
                   <span>Send</span>
@@ -125,7 +130,8 @@
             </div>
             
             <div class="chat-sidebar">
-              <div class="info-box">
+              <!-- Popular FAQs -->
+              <div class="info-box" style="margin-bottom: 16px;">
                 <div class="info-title">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;color:var(--secondary)">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -134,6 +140,38 @@
                 </div>
                 <div class="faq-list" id="sidebar-faq-list">
                   <!-- FAQs injected here dynamically -->
+                </div>
+              </div>
+
+              <!-- Azure AI Monitor -->
+              <div class="info-box" style="border-left: 3px solid #0078d4;">
+                <div class="info-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;color:#0078d4">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <span>Azure AI Monitor</span>
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border-color); padding-bottom:6px;">
+                    <span>Active Provider:</span>
+                    <strong style="color:var(--primary)" id="monitor-provider">Demo Mode</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border-color); padding-bottom:6px;">
+                    <span>AI Requests:</span>
+                    <strong id="monitor-calls">0</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border-color); padding-bottom:6px;">
+                    <span>Avg. Latency:</span>
+                    <strong id="monitor-latency">0 ms</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; border-bottom: 1px solid var(--border-color); padding-bottom:6px;">
+                    <span>Est. Tokens:</span>
+                    <strong id="monitor-tokens">0</strong>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; color:var(--accent);">
+                    <span>Azure Cost Saved:</span>
+                    <strong id="monitor-saving">$0.00</strong>
+                  </div>
                 </div>
               </div>
             </div>

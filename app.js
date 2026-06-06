@@ -15,6 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
     accentColor: localStorage.getItem("accentColor") || "windows"
   };
 
+  // --- TELEMETRY METRICS ---
+  const metrics = {
+    calls: parseInt(localStorage.getItem("m_calls") || "0"),
+    latencySum: parseInt(localStorage.getItem("m_latencySum") || "0"),
+    tokens: parseInt(localStorage.getItem("m_tokens") || "0")
+  };
+
   // --- DOM ELEMENTS ---
   const tabs = document.querySelectorAll(".nav-item");
   const tabPanes = document.querySelectorAll(".tab-pane");
@@ -59,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatMessagesBox = document.getElementById("chat-messages-box");
   const chatTextInput = document.getElementById("chat-text-input");
   const chatSendBtn = document.getElementById("chat-send-btn");
+  const chatMicBtn = document.getElementById("chat-mic-btn");
   const chatSuggestionChips = document.getElementById("chat-suggestion-chips");
 
   // Summarizer Elements
@@ -84,6 +92,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const generatorResultContent = document.getElementById("generator-result-content");
   const generatorCopyBtn = document.getElementById("generator-copy-btn");
   const generatorDownloadBtn = document.getElementById("generator-download-btn");
+
+  // Telemetry Monitor DOM Elements
+  const monitorProvider = document.getElementById("monitor-provider");
+  const monitorCalls = document.getElementById("monitor-calls");
+  const monitorLatency = document.getElementById("monitor-latency");
+  const monitorTokens = document.getElementById("monitor-tokens");
+  const monitorSaving = document.getElementById("monitor-saving");
 
   // Toast Container
   const toastContainer = document.getElementById("toast-notification-container");
@@ -128,6 +143,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- TELEMETRY LOGGER ---
+  function updateTelemetry(latencyMs, promptLength, responseLength) {
+    metrics.calls += 1;
+    metrics.latencySum += Math.round(latencyMs);
+    
+    // Simple tokens calculation: ~4 characters per token
+    const approxTokens = Math.round((promptLength + responseLength) / 4);
+    metrics.tokens += approxTokens;
+
+    localStorage.setItem("m_calls", metrics.calls.toString());
+    localStorage.setItem("m_latencySum", metrics.latencySum.toString());
+    localStorage.setItem("m_tokens", metrics.tokens.toString());
+
+    updateMonitorUI();
+  }
+
+  function updateMonitorUI() {
+    if (!monitorProvider) return;
+
+    if (state.apiMode === "demo") {
+      monitorProvider.textContent = "Demo Mode";
+      monitorProvider.style.color = "var(--text-secondary)";
+    } else {
+      const name = state.aiProvider === "azure" ? "Azure OpenAI" : "Google Gemini";
+      monitorProvider.textContent = name;
+      monitorProvider.style.color = "var(--primary)";
+    }
+
+    monitorCalls.textContent = metrics.calls;
+    
+    const avgLatency = metrics.calls > 0 ? Math.round(metrics.latencySum / metrics.calls) : 0;
+    monitorLatency.textContent = `${avgLatency} ms`;
+    
+    monitorTokens.textContent = metrics.tokens;
+
+    // Estimate Cloud Advisor savings (simulated Azure OpenAI optimization advice: e.g. $0.0015 per 1k tokens)
+    const costSaved = (metrics.tokens * 0.000015).toFixed(4);
+    monitorSaving.textContent = `$${costSaved}`;
+  }
+
   // --- INITIALIZE APPLICATION ---
   function init() {
     // 1. Theme & Accent Configuration
@@ -148,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     updateSettingsModalFields();
     updateStatusBadge();
+    updateMonitorUI();
 
     // 3. Render Chatbot Pre-configured FAQs
     if (window.ChatbotModule) {
@@ -164,6 +220,12 @@ document.addEventListener("DOMContentLoaded", () => {
         updateWordCount();
         showToast("success", `Loaded file: ${filename}`);
       });
+    }
+
+    // 5. Speak welcome message button binding
+    const welcomeBubble = document.querySelector(".message.assistant");
+    if (welcomeBubble) {
+      appendSpeakerIcon(welcomeBubble, "Welcome to the Microsoft Foundry Workshop! I am your AI FAQ Assistant. Feel free to pick a suggested topic below or type your own question.");
     }
 
     // Bind event listeners
@@ -229,6 +291,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (query) sendChatMessage(query);
       }
     });
+
+    // Voice Input Speech-to-Text Setup
+    setupSpeechToText();
 
     // Suggestion chips
     if (chatSuggestionChips) {
@@ -397,6 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateStatusBadge();
     closeSettings();
+    updateMonitorUI();
     
     const providerName = state.aiProvider === "azure" ? "Azure OpenAI" : "Google Gemini";
     showToast("success", `Configuration saved! Mode: ${state.apiMode === 'live' ? `Live AI (${providerName})` : 'Demo'}`);
@@ -411,6 +477,132 @@ document.addEventListener("DOMContentLoaded", () => {
       statusBadge.className = "badge-mode demo";
       statusBadgeText.textContent = "Demo Mode";
     }
+  }
+
+  // --- SPEECH RECOGNITION (STT) ---
+  function setupSpeechToText() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      chatMicBtn.style.display = "none";
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    let isListening = false;
+
+    chatMicBtn.addEventListener("click", () => {
+      if (isListening) {
+        recognition.stop();
+      } else {
+        chatMicBtn.style.color = "var(--primary)";
+        chatMicBtn.style.borderColor = "var(--primary)";
+        chatMicBtn.innerHTML = `
+          <div class="typing-dots" style="height:10px; gap:2px; justify-content:center;">
+            <span style="width:4px; height:4px; background:var(--primary); margin:0;"></span>
+            <span style="width:4px; height:4px; background:var(--primary); margin:0;"></span>
+            <span style="width:4px; height:4px; background:var(--primary); margin:0;"></span>
+          </div>
+        `;
+        recognition.start();
+      }
+    });
+
+    recognition.onstart = () => { isListening = true; };
+    recognition.onend = () => {
+      isListening = false;
+      chatMicBtn.style.color = "var(--text-secondary)";
+      chatMicBtn.style.borderColor = "var(--border-color)";
+      chatMicBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        </svg>
+      `;
+    };
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      chatTextInput.value = transcript;
+      showToast("success", "Voice query captured!");
+    };
+
+    recognition.onerror = (e) => {
+      console.error("Speech Recognition Error:", e.error);
+      showToast("error", "Speech capturing failed: " + e.error);
+    };
+  }
+
+  // --- SPEECH SYNTHESIS (TTS) ---
+  let activeUtterance = null;
+  function speakText(text) {
+    const cleanText = text.replace(/[\*\#\-\`\_]/g, ""); // Strip markdown characters
+    
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      // If we clicked the speaker button again to stop the same text, return
+      if (activeUtterance && activeUtterance.text === cleanText) {
+        activeUtterance = null;
+        return;
+      }
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const voices = window.speechSynthesis.getVoices();
+    const cleanVoice = voices.find(v => v.lang.includes("en-US") || v.lang.includes("en-GB"));
+    if (cleanVoice) {
+      utterance.voice = cleanVoice;
+    }
+    utterance.rate = 1.05;
+
+    activeUtterance = utterance;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function appendSpeakerIcon(messageElement, rawText) {
+    const bubble = messageElement.querySelector(".msg-bubble");
+    if (!bubble) return;
+
+    // Create a speech trigger button
+    const speakerBtn = document.createElement("button");
+    speakerBtn.className = "icon-btn";
+    speakerBtn.title = "Read aloud";
+    speakerBtn.style.cssText = `
+      position: absolute;
+      top: 6px;
+      right: -32px;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease, color 0.15s ease;
+    `;
+    speakerBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:12px;height:12px;">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+      </svg>
+    `;
+
+    // Make button visible on message hover
+    messageElement.style.position = "relative";
+    messageElement.addEventListener("mouseenter", () => { speakerBtn.style.opacity = "1"; });
+    messageElement.addEventListener("mouseleave", () => { speakerBtn.style.opacity = "0"; });
+
+    speakerBtn.addEventListener("click", () => {
+      speakText(rawText);
+    });
+
+    messageElement.appendChild(speakerBtn);
   }
 
   // --- UNIFIED AI CALL ROUTER ---
@@ -592,6 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function sendChatMessage(query) {
     if (!query) return;
     
+    const startTime = performance.now();
     appendMessage("user", query);
     chatTextInput.value = "";
     
@@ -621,9 +814,16 @@ document.addEventListener("DOMContentLoaded", () => {
         reply = await callAI(customPrompt);
       }
 
+      const latency = performance.now() - startTime;
       typingBubble.remove();
-      appendMessage("assistant", reply);
+      
+      const messageEl = appendMessage("assistant", reply);
+      appendSpeakerIcon(messageEl, reply);
+      
       chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+
+      // Update telemetry monitor stats
+      updateTelemetry(latency, query.length, reply.length);
       
     } catch (err) {
       typingBubble.remove();
@@ -643,6 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="msg-bubble">${formatted}</div>
     `;
     chatMessagesBox.appendChild(msg);
+    return msg;
   }
 
   function appendTypingIndicator() {
@@ -677,6 +878,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const length = summaryLength.value;
     const tone = summaryTone.value;
+    const startTime = performance.now();
 
     summaryPlaceholder.style.display = "none";
     summaryResultContent.style.display = "block";
@@ -699,8 +901,11 @@ document.addEventListener("DOMContentLoaded", () => {
         result = await callAI(prompt);
       }
 
+      const latency = performance.now() - startTime;
       summaryResultContent.innerHTML = formatMarkdown(result);
       showToast("success", "Summary generated successfully!");
+
+      updateTelemetry(latency, text.length, result.length);
 
     } catch (err) {
       summaryResultContent.innerHTML = `<p style="color:var(--danger)">❌ Error generating summary: ${err.message}</p>`;
@@ -719,6 +924,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const format = generatorFormat.value;
     const tone = generatorTone.value;
     const language = generatorLanguage.value;
+    const startTime = performance.now();
 
     generatorPlaceholder.style.display = "none";
     generatorResultContent.style.display = "block";
@@ -743,8 +949,11 @@ document.addEventListener("DOMContentLoaded", () => {
         result = await callAI(prompt);
       }
 
+      const latency = performance.now() - startTime;
       generatorResultContent.innerHTML = formatMarkdown(result);
       showToast("success", "Content generated successfully!");
+
+      updateTelemetry(latency, promptText.length, result.length);
 
     } catch (err) {
       generatorResultContent.innerHTML = `<p style="color:var(--danger)">❌ Error generating content: ${err.message}</p>`;
@@ -762,6 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Download Markdown file utility
   function downloadAsFile(text, filename) {
     if (!text) return;
     const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
