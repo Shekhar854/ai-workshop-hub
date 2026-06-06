@@ -1,0 +1,23 @@
+{
+  "name": "ai-workshop-hub",
+  "version": "1.0.0",
+  "description": "Premium AI Workshop Hub with FAQ Chatbot, Document Summarizer, and Multilingual Content Generator",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "ai",
+    "chatbot",
+    "summarizer",
+    "translator",
+    "foundry-workshop"
+  ],
+  "author": "Workshop Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}

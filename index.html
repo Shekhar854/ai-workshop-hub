@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Workshop Hub - FAQ Chatbot, Summarizer & Content Generator</title>
+  <meta name="description" content="A premium AI workshop toolkit containing an FAQ Chatbot, AI Document Summarizer, and Multilingual Content Generator. Built for Microsoft Foundry Workshop.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">AI</div>
+        <div class="brand-name">AI Workshop Hub</div>
+      </div>
+      
+      <ul class="nav-links">
+        <li class="nav-item active" data-tab="chatbot">
+          <button id="nav-btn-chatbot">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span>FAQ Chatbot</span>
+          </button>
+        </li>
+        <li class="nav-item" data-tab="summarizer">
+          <button id="nav-btn-summarizer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>AI Summarizer</span>
+          </button>
+        </li>
+        <li class="nav-item" data-tab="generator">
+          <button id="nav-btn-generator">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <span>Content Generator</span>
+          </button>
+        </li>
+      </ul>
+      
+      <div class="sidebar-footer">
+        <button class="footer-btn" id="theme-toggle-btn" aria-label="Toggle Theme">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m2.828 0l-.707-.707m2.828-11.314l-.707-.707M12 7a5 5 0 100 10 5 5 0 000-10z" />
+          </svg>
+          <span>Toggle Theme</span>
+        </button>
+        <button class="footer-btn" id="settings-trigger-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>API Settings</span>
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Main Window Area -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-title">
+          <h1 id="current-tab-title">FAQ Chatbot</h1>
+        </div>
+        <div class="header-actions">
+          <div class="badge-mode demo" id="status-badge">
+            <span class="status-dot">●</span>
+            <span id="status-badge-text">Demo Mode</span>
+          </div>
+          <button class="icon-btn" id="header-settings-btn" title="Open API Settings" aria-label="Open Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </button>
+        </div>
+      </header>
+      
+      <!-- Tab Contents Viewport -->
+      <div class="tab-viewport">
+        
+        <!-- Tab 1: Chatbot -->
+        <section class="tab-pane active" id="tab-chatbot">
+          <div class="chatbot-grid">
+            <div class="chat-window">
+              <div class="chat-header">
+                <div class="chat-avatar">AI</div>
+                <div>
+                  <div class="chat-status-title">Workshop FAQ Assistant</div>
+                  <div class="chat-status-sub" id="chat-sub-status">Ask me anything about the workshop or select a suggestion below.</div>
+                </div>
+              </div>
+              <div class="chat-messages" id="chat-messages-box">
+                <!-- Message structures will be injected here -->
+                <div class="message assistant">
+                  <div class="chat-avatar">AI</div>
+                  <div class="msg-bubble">
+                    <p>Welcome to the **Microsoft Foundry Workshop**! I am your AI FAQ Assistant. Feel free to pick a suggested topic below or type your own question.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="chat-suggestions" id="chat-suggestion-chips">
+                <button class="chip-btn" data-query="What is Microsoft Foundry?">What is Microsoft Foundry?</button>
+                <button class="chip-btn" data-query="How can I use Gemini API?">How can I use Gemini API?</button>
+                <button class="chip-btn" data-query="What are we building today?">What are we building today?</button>
+                <button class="chip-btn" data-query="Can I deploy this app?">Can I deploy this app?</button>
+              </div>
+              <div class="chat-input-area">
+                <div class="input-wrapper">
+                  <input type="text" id="chat-text-input" class="chat-input" placeholder="Type your question here..." aria-label="Type your question">
+                </div>
+                <button class="btn-primary" id="chat-send-btn">
+                  <span>Send</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="chat-sidebar">
+              <div class="info-box">
+                <div class="info-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;color:var(--secondary)">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Popular FAQs</span>
+                </div>
+                <div class="faq-list" id="sidebar-faq-list">
+                  <!-- FAQs injected here dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Tab 2: Summarizer -->
+        <section class="tab-pane" id="tab-summarizer">
+          <div class="tool-grid">
+            <div class="glass-card" style="margin-bottom: 0;">
+              <div class="card-title">Document Inputs</div>
+              
+              <div class="form-group">
+                <label class="form-label">Upload Document</label>
+                <div class="file-drag-zone" id="summarizer-drag-zone">
+                  <svg class="file-drag-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <div class="file-drag-text">Drag & drop your file here, or click to browse</div>
+                  <div class="file-drag-sub">Supports .txt, .md, .csv (Max 1MB)</div>
+                  <input type="file" id="summarizer-file-input" class="file-input" accept=".txt,.md,.csv,.json">
+                </div>
+              </div>
+              
+              <div class="divider">Or paste text</div>
+              
+              <div class="form-group">
+                <label for="summarizer-text-input" class="form-label">Raw Text (Word Count: <span id="word-count-badge">0</span>)</label>
+                <textarea id="summarizer-text-input" class="textbox" placeholder="Paste your document content here..."></textarea>
+              </div>
+              
+              <div class="options-grid">
+                <div class="form-group">
+                  <label for="summary-length" class="form-label">Summary Length</label>
+                  <select id="summary-length" class="select-control">
+                    <option value="short">Short (Bullet Points)</option>
+                    <option value="medium" selected>Medium (Detailed Overview)</option>
+                    <option value="long">Long (Executive Summary)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="summary-tone" class="form-label">Tone & Focus</label>
+                  <select id="summary-tone" class="select-control">
+                    <option value="professional" selected>Professional & Formal</option>
+                    <option value="educational">Educational & Explanatory</option>
+                    <option value="casual">Simple & Casual</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button class="btn-primary" id="summarizer-run-btn" style="width: 100%; justify-content: center; padding: 14px;">
+                <span>Generate Summary</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </button>
+            </div>
+            
+            <div class="results-panel">
+              <div class="results-header">
+                <div class="card-title" style="margin-bottom: 0;">AI Assistant Summary</div>
+                <div class="actions-group">
+                  <button class="btn-secondary" id="summary-copy-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    <span>Copy</span>
+                  </button>
+                  <button class="btn-secondary" id="summary-download-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="results-card">
+                <div class="results-placeholder" id="summary-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p>Your document summary will appear here.<br>Paste text or drop a file on the left, then click Generate.</p>
+                </div>
+                <div class="results-content" id="summary-result-content" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Tab 3: Content Generator -->
+        <section class="tab-pane" id="tab-generator">
+          <div class="tool-grid">
+            <div class="glass-card" style="margin-bottom: 0;">
+              <div class="card-title">Generation Parameters</div>
+              
+              <div class="form-group">
+                <label for="generator-prompt-input" class="form-label">Topic or Detailed Prompt</label>
+                <textarea id="generator-prompt-input" class="textbox" placeholder="Describe what you want to write about (e.g. 'Benefits of automated UI testing using Python in CI/CD pipeline')"></textarea>
+              </div>
+              
+              <div class="options-grid">
+                <div class="form-group">
+                  <label for="generator-format" class="form-label">Content Format</label>
+                  <select id="generator-format" class="select-control">
+                    <option value="blog" selected>Blog Post / Article</option>
+                    <option value="email">Professional Email</option>
+                    <option value="social">Social Media Post</option>
+                    <option value="bullets">Key Takeaways List</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="generator-tone" class="form-label">Tone</label>
+                  <select id="generator-tone" class="select-control">
+                    <option value="creative">Creative & engaging</option>
+                    <option value="professional" selected>Professional & Authority</option>
+                    <option value="witty">Witty & Humorous</option>
+                    <option value="informative">Informative & Technical</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="generator-language" class="form-label">Target Language</label>
+                <select id="generator-language" class="select-control">
+                  <option value="English" selected>English</option>
+                  <option value="Hindi">Hindi (हिन्दी)</option>
+                  <option value="Spanish">Spanish (Español)</option>
+                  <option value="German">German (Deutsch)</option>
+                  <option value="French">French (Français)</option>
+                  <option value="Japanese">Japanese (日本語)</option>
+                  <option value="Chinese">Chinese (中文)</option>
+                </select>
+              </div>
+              
+              <button class="btn-primary" id="generator-run-btn" style="width: 100%; justify-content: center; padding: 14px;">
+                <span>Generate Content</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              </button>
+            </div>
+            
+            <div class="results-panel">
+              <div class="results-header">
+                <div class="card-title" style="margin-bottom: 0;">Generated Multilingual Content</div>
+                <div class="actions-group">
+                  <button class="btn-secondary" id="generator-copy-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    <span>Copy</span>
+                  </button>
+                  <button class="btn-secondary" id="generator-download-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="results-card">
+                <div class="results-placeholder" id="generator-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  <p>Your generated content will appear here.<br>Enter a topic, select formats and target languages, then click Generate.</p>
+                </div>
+                <div class="results-content" id="generator-result-content" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+      </div>
+    </main>
+  </div>
+  
+  <!-- Settings Panel Drawer / Modal overlay -->
+  <div class="settings-overlay" id="settings-modal-overlay">
+    <div class="settings-modal">
+      <div class="settings-header">
+        <h3>API Configuration</h3>
+        <button class="icon-btn" id="settings-close-btn" style="border:none; background:transparent;" aria-label="Close Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="settings-body">
+        <div class="form-group">
+          <label class="form-label" style="display:flex; justify-content:space-between;">
+            <span>API Execution Mode</span>
+            <span style="font-weight:normal; font-size:0.8rem; color:var(--primary)" id="mode-status-indicator">Demo Mode active</span>
+          </label>
+          <div style="display:flex; gap:12px; margin-top:8px;">
+            <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-sm); cursor:pointer;">
+              <input type="radio" name="api-mode" value="demo" checked id="radio-mode-demo">
+              <div>
+                <div style="font-weight:600; font-size:0.9rem;">Demo Mode</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">Runs locally with templates</div>
+              </div>
+            </label>
+            <label style="flex:1; display:flex; align-items:center; gap:8px; padding:12px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-sm); cursor:pointer;">
+              <input type="radio" name="api-mode" value="live" id="radio-mode-live">
+              <div>
+                <div style="font-weight:600; font-size:0.9rem;">Live AI Mode</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">Uses actual Gemini API</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group" id="apikey-input-group" style="opacity:0.5; pointer-events:none; transition:var(--transition);">
+          <label for="gemini-api-key" class="form-label">Gemini API Key</label>
+          <input type="password" id="gemini-api-key" class="chat-input" placeholder="AIzaSy...">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
+            Your key is saved locally in your browser storage and never shared elsewhere. You can generate a free key from Google AI Studio.
+          </div>
+        </div>
+      </div>
+      <div class="settings-footer">
+        <button class="btn-secondary" id="settings-cancel-btn">Cancel</button>
+        <button class="btn-primary" id="settings-save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-notification-container"></div>
+  
+  <!-- Script inclusions -->
+  <script type="module" src="chatbot.js"></script>
+  <script type="module" src="summarizer.js"></script>
+  <script type="module" src="generator.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
