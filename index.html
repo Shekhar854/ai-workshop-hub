@@ -325,7 +325,18 @@
         </button>
       </div>
       <div class="settings-body">
-        <div class="form-group">
+        <!-- Fluent UI Theme Accent Color -->
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Fluent UI Accent Color</label>
+          <div style="display:flex; gap:8px; margin-top:8px;" id="theme-accent-container">
+            <button class="accent-picker-btn" data-accent="windows" title="Windows Blue" style="border-radius:var(--radius-sm); border:2px solid var(--border-color); background:#0078d4; width:32px; height:32px; cursor:pointer; padding:0; transition:var(--transition);"></button>
+            <button class="accent-picker-btn" data-accent="teams" title="Teams Purple" style="border-radius:var(--radius-sm); border:1px solid var(--border-color); background:#6264a7; width:32px; height:32px; cursor:pointer; padding:0; transition:var(--transition);"></button>
+            <button class="accent-picker-btn" data-accent="xbox" title="Xbox Green" style="border-radius:var(--radius-sm); border:1px solid var(--border-color); background:#107c10; width:32px; height:32px; cursor:pointer; padding:0; transition:var(--transition);"></button>
+            <button class="accent-picker-btn" data-accent="office" title="Office Orange" style="border-radius:var(--radius-sm); border:1px solid var(--border-color); background:#d83b01; width:32px; height:32px; cursor:pointer; padding:0; transition:var(--transition);"></button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
           <label class="form-label" style="display:flex; justify-content:space-between;">
             <span>API Execution Mode</span>
             <span style="font-weight:normal; font-size:0.8rem; color:var(--primary)" id="mode-status-indicator">Demo Mode active</span>
@@ -342,17 +353,49 @@
               <input type="radio" name="api-mode" value="live" id="radio-mode-live">
               <div>
                 <div style="font-weight:600; font-size:0.9rem;">Live AI Mode</div>
-                <div style="font-size:0.75rem; color:var(--text-muted);">Uses actual Gemini API</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">Uses actual endpoints</div>
               </div>
             </label>
           </div>
         </div>
-        
-        <div class="form-group" id="apikey-input-group" style="opacity:0.5; pointer-events:none; transition:var(--transition);">
-          <label for="gemini-api-key" class="form-label">Gemini API Key</label>
-          <input type="password" id="gemini-api-key" class="chat-input" placeholder="AIzaSy...">
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">
-            Your key is saved locally in your browser storage and never shared elsewhere. You can generate a free key from Google AI Studio.
+
+        <!-- Live Service Configuration (Toggled in JS) -->
+        <div id="live-config-container" style="display:none; flex-direction:column; gap:16px; transition:var(--transition); padding-top:4px; border-top:1px solid var(--border-color); margin-top:16px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="ai-provider" class="form-label">AI Service Provider</label>
+            <select id="ai-provider" class="select-control">
+              <option value="gemini" selected>Google Gemini API</option>
+              <option value="azure">Azure OpenAI Service</option>
+            </select>
+          </div>
+          
+          <!-- Gemini Inputs -->
+          <div class="form-group" id="gemini-inputs-panel" style="margin-bottom:0;">
+            <label for="gemini-api-key" class="form-label">Gemini API Key</label>
+            <input type="password" id="gemini-api-key" class="chat-input" placeholder="AIzaSy...">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
+              Generated from Google AI Studio. Stored locally.
+            </div>
+          </div>
+          
+          <!-- Azure OpenAI Inputs -->
+          <div id="azure-inputs-panel" style="display:none; flex-direction:column; gap:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="azure-endpoint" class="form-label">Azure Endpoint URL</label>
+              <input type="text" id="azure-endpoint" class="chat-input" placeholder="https://your-resource.openai.azure.com/">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="azure-api-key" class="form-label">Azure API Key</label>
+              <input type="password" id="azure-api-key" class="chat-input" placeholder="Azure API Key...">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="azure-deployment" class="form-label">Deployment Name</label>
+              <input type="text" id="azure-deployment" class="chat-input" placeholder="gpt-4o">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="azure-api-version" class="form-label">API Version</label>
+              <input type="text" id="azure-api-version" class="chat-input" value="2024-02-15-preview" placeholder="2024-02-15-preview">
+            </div>
           </div>
         </div>
       </div>

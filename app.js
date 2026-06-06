@@ -6,7 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
     activeTab: "chatbot",
     theme: localStorage.getItem("theme") || "dark",
     apiMode: localStorage.getItem("apiMode") || "demo", // 'demo' or 'live'
-    apiKey: localStorage.getItem("apiKey") || ""
+    aiProvider: localStorage.getItem("aiProvider") || "gemini", // 'gemini' or 'azure'
+    apiKey: localStorage.getItem("apiKey") || "",
+    azureEndpoint: localStorage.getItem("azureEndpoint") || "",
+    azureApiKey: localStorage.getItem("azureApiKey") || "",
+    azureDeployment: localStorage.getItem("azureDeployment") || "",
+    azureApiVersion: localStorage.getItem("azureApiVersion") || "2024-02-15-preview",
+    accentColor: localStorage.getItem("accentColor") || "windows"
   };
 
   // --- DOM ELEMENTS ---
@@ -29,8 +35,24 @@ document.addEventListener("DOMContentLoaded", () => {
   
   const radioDemo = document.getElementById("radio-mode-demo");
   const radioLive = document.getElementById("radio-mode-live");
+  
+  // Service Provider Select
+  const aiProviderSelect = document.getElementById("ai-provider");
+  const liveConfigContainer = document.getElementById("live-config-container");
+  
+  // Panel Configurations
+  const geminiInputsPanel = document.getElementById("gemini-inputs-panel");
+  const azureInputsPanel = document.getElementById("azure-inputs-panel");
+  
+  // Input fields
   const apiKeyInput = document.getElementById("gemini-api-key");
-  const apiKeyGroup = document.getElementById("apikey-input-group");
+  const azureEndpointInput = document.getElementById("azure-endpoint");
+  const azureApiKeyInput = document.getElementById("azure-api-key");
+  const azureDeploymentInput = document.getElementById("azure-deployment");
+  const azureApiVersionInput = document.getElementById("azure-api-version");
+  
+  // Accent Picker Container
+  const themeAccentContainer = document.getElementById("theme-accent-container");
   const modeStatusIndicator = document.getElementById("mode-status-indicator");
 
   // Chatbot Elements
@@ -66,16 +88,64 @@ document.addEventListener("DOMContentLoaded", () => {
   // Toast Container
   const toastContainer = document.getElementById("toast-notification-container");
 
+  // --- ACCENT THEMES ---
+  const accentColors = {
+    windows: {
+      dark: { primary: "#60cdff", secondary: "#0078d4" },
+      light: { primary: "#0078d4", secondary: "#005a9e" }
+    },
+    teams: {
+      dark: { primary: "#a6b1e1", secondary: "#6264a7" },
+      light: { primary: "#6264a7", secondary: "#4f4b87" }
+    },
+    xbox: {
+      dark: { primary: "#10b981", secondary: "#107c10" },
+      light: { primary: "#107c10", secondary: "#0b580b" }
+    },
+    office: {
+      dark: { primary: "#ffb900", secondary: "#d83b01" },
+      light: { primary: "#d83b01", secondary: "#a82e00" }
+    }
+  };
+
+  function applyAccent(accent, theme) {
+    const colors = accentColors[accent]?.[theme] || accentColors.windows[theme];
+    document.documentElement.style.setProperty("--primary", colors.primary);
+    document.documentElement.style.setProperty("--primary-glow", colors.primary + "26"); // ~15% opacity hex extension
+    document.documentElement.style.setProperty("--secondary", colors.secondary);
+    document.documentElement.style.setProperty("--secondary-glow", colors.secondary + "26");
+    
+    // Highlight active picker in UI
+    const buttons = document.querySelectorAll(".accent-picker-btn");
+    buttons.forEach(btn => {
+      if (btn.dataset.accent === accent) {
+        btn.style.borderWidth = "2px";
+        btn.style.borderColor = "var(--text-primary)";
+      } else {
+        btn.style.borderWidth = "1px";
+        btn.style.borderColor = "var(--border-color)";
+      }
+    });
+  }
+
   // --- INITIALIZE APPLICATION ---
   function init() {
-    // 1. Theme Configuration
+    // 1. Theme & Accent Configuration
     document.documentElement.setAttribute("data-theme", state.theme);
     updateThemeIcon();
+    applyAccent(state.accentColor, state.theme);
 
     // 2. Settings Configuration
     radioDemo.checked = state.apiMode === "demo";
     radioLive.checked = state.apiMode === "live";
+    aiProviderSelect.value = state.aiProvider;
+    
     apiKeyInput.value = state.apiKey;
+    azureEndpointInput.value = state.azureEndpoint;
+    azureApiKeyInput.value = state.azureApiKey;
+    azureDeploymentInput.value = state.azureDeployment;
+    azureApiVersionInput.value = state.azureApiVersion;
+    
     updateSettingsModalFields();
     updateStatusBadge();
 
@@ -133,7 +203,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Settings inputs
     radioDemo.addEventListener("change", updateSettingsModalFields);
     radioLive.addEventListener("change", updateSettingsModalFields);
+    aiProviderSelect.addEventListener("change", updateSettingsModalFields);
     settingsSaveBtn.addEventListener("click", saveSettings);
+
+    // Accent picker actions
+    themeAccentContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest(".accent-picker-btn");
+      if (btn) {
+        const selectedAccent = btn.dataset.accent;
+        state.accentColor = selectedAccent;
+        localStorage.setItem("accentColor", selectedAccent);
+        applyAccent(selectedAccent, state.theme);
+        showToast("success", `Applied ${selectedAccent} color scheme`);
+      }
+    });
 
     // FAQ Chatbot: Input Actions
     chatSendBtn.addEventListener("click", () => {
@@ -214,16 +297,15 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.setAttribute("data-theme", state.theme);
     localStorage.setItem("theme", state.theme);
     updateThemeIcon();
+    applyAccent(state.accentColor, state.theme);
     showToast("success", `Switched to ${state.theme} mode`);
   }
 
   function updateThemeIcon() {
     const icon = themeToggleBtn.querySelector("svg");
     if (state.theme === "light") {
-      // Moon representation
       icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`;
     } else {
-      // Sun representation
       icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m2.828 0l-.707-.707m2.828-11.314l-.707-.707M12 7a5 5 0 100 10 5 5 0 000-10z" />`;
     }
   }
@@ -231,9 +313,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- SETTINGS MODAL ---
   function openSettings() {
     settingsModal.style.display = "flex";
-    apiKeyInput.value = state.apiKey;
+    
+    // Load state
     radioDemo.checked = state.apiMode === "demo";
     radioLive.checked = state.apiMode === "live";
+    aiProviderSelect.value = state.aiProvider;
+    
+    apiKeyInput.value = state.apiKey;
+    azureEndpointInput.value = state.azureEndpoint;
+    azureApiKeyInput.value = state.azureApiKey;
+    azureDeploymentInput.value = state.azureDeployment;
+    azureApiVersionInput.value = state.azureApiVersion;
+    
     updateSettingsModalFields();
   }
 
@@ -243,57 +334,102 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateSettingsModalFields() {
     const isLive = radioLive.checked;
+    const provider = aiProviderSelect.value;
+    
     if (isLive) {
-      apiKeyGroup.style.opacity = "1";
-      apiKeyGroup.style.pointerEvents = "all";
+      liveConfigContainer.style.display = "flex";
       modeStatusIndicator.textContent = "Live AI Mode active";
       modeStatusIndicator.style.color = "var(--primary)";
+      
+      // Conditional inputs based on provider select
+      if (provider === "gemini") {
+        geminiInputsPanel.style.display = "block";
+        azureInputsPanel.style.display = "none";
+      } else {
+        geminiInputsPanel.style.display = "none";
+        azureInputsPanel.style.display = "flex";
+      }
     } else {
-      apiKeyGroup.style.opacity = "0.5";
-      apiKeyGroup.style.pointerEvents = "none";
+      liveConfigContainer.style.display = "none";
       modeStatusIndicator.textContent = "Demo Mode active";
-      modeStatusIndicator.style.color = "var(--secondary)";
+      modeStatusIndicator.style.color = "var(--text-muted)";
     }
   }
 
   function saveSettings() {
     const selectedMode = radioDemo.checked ? "demo" : "live";
-    const enteredKey = apiKeyInput.value.trim();
+    const selectedProvider = aiProviderSelect.value;
+    
+    const enteredGeminiKey = apiKeyInput.value.trim();
+    const enteredAzureEndpoint = azureEndpointInput.value.trim();
+    const enteredAzureApiKey = azureApiKeyInput.value.trim();
+    const enteredAzureDeployment = azureDeploymentInput.value.trim();
+    const enteredAzureVersion = azureApiVersionInput.value.trim();
 
-    if (selectedMode === "live" && !enteredKey) {
-      showToast("error", "API Key is required to run in Live AI Mode!");
-      return;
+    // Verification
+    if (selectedMode === "live") {
+      if (selectedProvider === "gemini" && !enteredGeminiKey) {
+        showToast("error", "Gemini API Key is required for Gemini Live AI!");
+        return;
+      }
+      if (selectedProvider === "azure" && (!enteredAzureEndpoint || !enteredAzureApiKey || !enteredAzureDeployment)) {
+        showToast("error", "Azure Endpoint, API Key, and Deployment Name are required for Azure Live AI!");
+        return;
+      }
     }
 
     state.apiMode = selectedMode;
-    state.apiKey = enteredKey;
+    state.aiProvider = selectedProvider;
+    state.apiKey = enteredGeminiKey;
+    state.azureEndpoint = enteredAzureEndpoint;
+    state.azureApiKey = enteredAzureApiKey;
+    state.azureDeployment = enteredAzureDeployment;
+    state.azureApiVersion = enteredAzureVersion;
 
+    // Save in storage
     localStorage.setItem("apiMode", state.apiMode);
+    localStorage.setItem("aiProvider", state.aiProvider);
     localStorage.setItem("apiKey", state.apiKey);
+    localStorage.setItem("azureEndpoint", state.azureEndpoint);
+    localStorage.setItem("azureApiKey", state.azureApiKey);
+    localStorage.setItem("azureDeployment", state.azureDeployment);
+    localStorage.setItem("azureApiVersion", state.azureApiVersion);
 
     updateStatusBadge();
     closeSettings();
-    showToast("success", `Configuration saved! Running in ${state.apiMode === 'live' ? 'Live AI' : 'Demo'} mode.`);
+    
+    const providerName = state.aiProvider === "azure" ? "Azure OpenAI" : "Google Gemini";
+    showToast("success", `Configuration saved! Mode: ${state.apiMode === 'live' ? `Live AI (${providerName})` : 'Demo'}`);
   }
 
   function updateStatusBadge() {
     if (state.apiMode === "live") {
       statusBadge.className = "badge-mode";
-      statusBadgeText.textContent = "Live AI Mode";
+      const name = state.aiProvider === "azure" ? "Azure AI" : "Gemini AI";
+      statusBadgeText.textContent = `Live (${name})`;
     } else {
       statusBadge.className = "badge-mode demo";
       statusBadgeText.textContent = "Demo Mode";
     }
   }
 
-  // --- GEMINI API CONNECTOR ---
-  async function callGeminiAPI(promptText) {
+  // --- UNIFIED AI CALL ROUTER ---
+  async function callAI(promptText) {
     if (state.apiMode === "demo") {
-      throw new Error("Cannot call live API in Demo mode.");
+      throw new Error("Cannot query backend in Demo Mode.");
     }
     
+    if (state.aiProvider === "azure") {
+      return await callAzureOpenAI(promptText);
+    } else {
+      return await callGeminiAPI(promptText);
+    }
+  }
+
+  // --- GOOGLE GEMINI API CONNECTOR ---
+  async function callGeminiAPI(promptText) {
     if (!state.apiKey) {
-      throw new Error("No Gemini API Key provided. Open API Settings to configure.");
+      throw new Error("Gemini API Key missing! Open API Settings to configure.");
     }
 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
@@ -301,19 +437,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: promptText
-                }
-              ]
-            }
-          ]
+          contents: [{ parts: [{ text: promptText }] }]
         })
       });
 
@@ -327,12 +453,60 @@ document.addEventListener("DOMContentLoaded", () => {
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!text) {
-        throw new Error("Empty response received from the Gemini service.");
+        throw new Error("Empty response from Google Gemini.");
       }
 
       return text;
     } catch (error) {
       console.error("Gemini API Error:", error);
+      throw error;
+    }
+  }
+
+  // --- AZURE OPENAI API CONNECTOR ---
+  async function callAzureOpenAI(promptText) {
+    if (!state.azureEndpoint || !state.azureApiKey || !state.azureDeployment) {
+      throw new Error("Azure OpenAI credentials (Endpoint, API Key, Deployment) missing! Check API Settings.");
+    }
+
+    let baseEndpoint = state.azureEndpoint.trim();
+    if (baseEndpoint.endsWith("/")) {
+      baseEndpoint = baseEndpoint.slice(0, -1);
+    }
+
+    const version = state.azureApiVersion || "2024-02-15-preview";
+    const url = `${baseEndpoint}/openai/deployments/${state.azureDeployment}/chat/completions?api-version=${version}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": state.azureApiKey
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: promptText }],
+          max_tokens: 1000,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errMsg = errorData.error?.message || `HTTP ${response.status} Error`;
+        throw new Error(errMsg);
+      }
+
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content;
+
+      if (!text) {
+        throw new Error("Empty response from Azure OpenAI.");
+      }
+
+      return text;
+    } catch (error) {
+      console.error("Azure OpenAI Error:", error);
       throw error;
     }
   }
@@ -356,7 +530,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toastContainer.appendChild(toast);
     
-    // Auto-remove after 4 seconds
     setTimeout(() => {
       toast.style.animation = "fadeIn 0.3s ease reverse forwards";
       setTimeout(() => {
@@ -369,27 +542,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatMarkdown(text) {
     if (!text) return "";
     
-    // Escape standard tags
     let html = text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
     
-    // Bold: **text**
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="bold-text">$1</strong>');
-    
-    // Italic: *text*
     html = html.replace(/\*(.*?)\*/g, '<em class="italic-text">$1</em>');
 
-    // Headers: ###, ####
     html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
     html = html.replace(/^#### (.*?)$/gm, '<h4>$1</h4>');
     html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
 
-    // Bullet points: * or -
     html = html.replace(/^\s*[\*\-\+]\s+(.*?)$/gm, '<li>$1</li>');
 
-    // Process lists and paragraphs
     const lines = html.split("\n");
     let inList = false;
     let resultLines = [];
@@ -426,27 +592,23 @@ document.addEventListener("DOMContentLoaded", () => {
   async function sendChatMessage(query) {
     if (!query) return;
     
-    // Add user bubble
     appendMessage("user", query);
     chatTextInput.value = "";
     
-    // Show typing dots indicator
     const typingBubble = appendTypingIndicator();
     chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
 
     try {
       let reply = "";
       if (state.apiMode === "demo") {
-        // Mock Response
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simulating latency
+        await new Promise(resolve => setTimeout(resolve, 800));
         const match = ChatbotModule.findBestLocalResponse(query);
         if (match) {
           reply = match.answer;
         } else {
-          reply = `I'm currently running in **Demo Mode**. I couldn't find a exact match for your question in our pre-configured FAQs.\n\n*   To ask any custom questions in real-time, click **API Settings** and switch to **Live AI Mode** using your Gemini API key!\n*   Otherwise, try asking something else or clicking one of the popular FAQs on the right.`;
+          reply = `I'm currently running in **Demo Mode**. I couldn't find an exact match for your question in our pre-configured FAQs.\n\n*   To ask any custom questions in real-time, click **API Settings** and switch to **Live AI Mode** using your Gemini or Azure OpenAI credentials!\n*   Otherwise, try asking something else or clicking one of the popular FAQs on the right.`;
         }
       } else {
-        // Live API Response
         const customPrompt = `
           You are the Microsoft Foundry Workshop FAQ Assistant. Answer the user's question concisely based on the following pre-configured FAQs if possible:
           ${JSON.stringify(ChatbotModule.faqs)}
@@ -456,13 +618,10 @@ document.addEventListener("DOMContentLoaded", () => {
           User question: "${query}"
           Answer:
         `;
-        reply = await callGeminiAPI(customPrompt);
+        reply = await callAI(customPrompt);
       }
 
-      // Remove typing bubble
       typingBubble.remove();
-      
-      // Add response bubble
       appendMessage("assistant", reply);
       chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
       
@@ -477,14 +636,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function appendMessage(sender, text) {
     const msg = document.createElement("div");
     msg.className = `message ${sender}`;
-    
     const formatted = formatMarkdown(text);
     
     msg.innerHTML = `
       <div class="chat-avatar">${sender === "user" ? "ME" : "AI"}</div>
       <div class="msg-bubble">${formatted}</div>
     `;
-    
     chatMessagesBox.appendChild(msg);
   }
 
@@ -521,7 +678,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const length = summaryLength.value;
     const tone = summaryTone.value;
 
-    // Loading State UI toggle
     summaryPlaceholder.style.display = "none";
     summaryResultContent.style.display = "block";
     summaryResultContent.innerHTML = `<div class="typing-dots" style="justify-content:center; padding: 40px 0;"><span></span><span></span><span></span></div>`;
@@ -540,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
           Text to summarize:
           "${text}"
         `;
-        result = await callGeminiAPI(prompt);
+        result = await callAI(prompt);
       }
 
       summaryResultContent.innerHTML = formatMarkdown(result);
@@ -584,7 +740,7 @@ document.addEventListener("DOMContentLoaded", () => {
           Generate the content directly in the target language (${language}) using clean Markdown.
           Make sure it sounds natural, authentic, and perfectly suited for ${tone} audience.
         `;
-        result = await callGeminiAPI(prompt);
+        result = await callAI(prompt);
       }
 
       generatorResultContent.innerHTML = formatMarkdown(result);
